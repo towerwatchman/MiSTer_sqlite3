@@ -52,28 +52,40 @@ jobs:
 
       - name: Build SQLite3 Python Module
         run: |
-          # Set up Python 3.9 with cross-compiled SQLite
-          export PYTHONPATH=/usr/lib/python3.9
+          # Set up environment for cross-compiled SQLite
           export CFLAGS="$CFLAGS -I$PWD/sqlite3-source/install/usr/arm-linux-gnueabihf/include"
           export LDFLAGS="$LDFLAGS -L$PWD/sqlite3-source/install/usr/arm-linux-gnueabihf/lib"
-          # Compile Python's sqlite3 module against our SQLite
+          # Download and extract Python 3.9 source
           wget https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tar.xz
           tar -xJf Python-3.9.0.tar.xz
           cd Python-3.9.0
+          # Configure Python for cross-compilation
           ./configure --host=arm-linux-gnueabihf --build=x86_64-linux-gnu \
                       --prefix=/usr/arm-linux-gnueabihf \
                       --enable-shared \
                       --disable-ipv6 \
                       --with-ensurepip=no \
                       ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no
-          make -j$(nproc) LDFLAGS="$LDFLAGS -lsqlite3" Modules/_sqlite3.o
-          # Link the module manually
-          $CC -shared -o _sqlite3.so Modules/_sqlite3.o $LDFLAGS -lsqlite3 -lpthread
+          # Build Python with SQLite support
+          make -j$(nproc) LDFLAGS="$LDFLAGS -lsqlite3"
+          # Build and link the _sqlite3 module explicitly
+          cd Modules/_sqlite
+          $CC -c -o connection.o connection.c $CFLAGS -I../../Include -I../..
+          $CC -c -o cursor.o cursor.c $CFLAGS -I../../Include -I../..
+          $CC -c -o microprotocols.o microprotocols.c $CFLAGS -I../../Include -I../..
+          $CC -c -o module.o module.c $CFLAGS -I../../Include -I../..
+          $CC -c -o prepare_protocol.o prepare_protocol.c $CFLAGS -I../../Include -I../..
+          $CC -c -o row.o row.c $CFLAGS -I../../Include -I../..
+          $CC -c -o statement.o statement.c $CFLAGS -I../../Include -I../..
+          $CC -c -o util.o util.c $CFLAGS -I../../Include -I../..
+          $CC -c -o cache.o cache.c $CFLAGS -I../../Include -I../..
+          $CC -c -o _sqlite3.o _sqlite3.c $CFLAGS -I../../Include -I../..
+          $CC -shared -o _sqlite3.so *.o $LDFLAGS -lsqlite3 -lpthread
 
       - name: Package Artifacts
         run: |
           mkdir -p artifacts
-          cp Python-3.9.0/_sqlite3.so artifacts/
+          cp Python-3.9.0/Modules/_sqlite/_sqlite3.so artifacts/
           cp sqlite3-source/install/usr/arm-linux-gnueabihf/lib/libsqlite3.so.0 artifacts/
           tar -czf sqlite3-mister.tar.gz -C artifacts .
 
