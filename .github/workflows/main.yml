@@ -55,11 +55,19 @@ jobs:
           # Set up environment for cross-compiled SQLite
           export CFLAGS="$CFLAGS -I$PWD/sqlite3-source/install/usr/arm-linux-gnueabihf/include"
           export LDFLAGS="$LDFLAGS -L$PWD/sqlite3-source/install/usr/arm-linux-gnueabihf/lib"
-          # Download and extract Python 3.9 source (for headers and module source)
+          # Download and extract Python 3.9 source
           wget https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tar.xz
           tar -xJf Python-3.9.0.tar.xz
-          cd Python-3.9.0/Modules/_sqlite
-          # Compile each source file explicitly
+          cd Python-3.9.0
+          # Configure Python to generate headers (but don't build fully)
+          ./configure --host=arm-linux-gnueabihf --build=x86_64-linux-gnu \
+                      --prefix=/usr/arm-linux-gnueabihf \
+                      --enable-shared \
+                      --disable-ipv6 \
+                      --with-ensurepip=no \
+                      ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no
+          # Move to _sqlite module directory and compile
+          cd Modules/_sqlite
           arm-linux-gnueabihf-gcc -c connection.c -o connection.o $CFLAGS -I../../Include -I../..
           arm-linux-gnueabihf-gcc -c cursor.c -o cursor.o $CFLAGS -I../../Include -I../..
           arm-linux-gnueabihf-gcc -c microprotocols.c -o microprotocols.o $CFLAGS -I../../Include -I../..
