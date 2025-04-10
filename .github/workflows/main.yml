@@ -43,8 +43,8 @@ jobs:
           export LD=arm-linux-gnueabihf-ld
           export AR=arm-linux-gnueabihf-ar
           export RANLIB=arm-linux-gnueabihf-ranlib
-          export CFLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16"
-          export LDFLAGS="-L/usr/arm-linux-gnueabihf/lib"
+          export CFLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -fPIC"
+          export LDFLAGS="-L/usr/arm-linux-gnueabihf/lib -Wl,--no-as-needed"
 
       - name: Compile SQLite3 for ARM
         working-directory: sqlite3-source
@@ -94,7 +94,6 @@ jobs:
       - name: Create Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          # Set release version as YYYY.MM.DD.run_number
           VERSION="v$(date +%Y.%m.%d).${{ github.run_number }}"
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
