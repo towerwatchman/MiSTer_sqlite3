@@ -87,8 +87,26 @@ jobs:
           cp sqlite3-source/install/usr/arm-linux-gnueabihf/lib/libsqlite3.so.0 artifacts/
           tar -czf sqlite3-mister.tar.gz -C artifacts .
 
-      - name: Upload Artifacts
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: sqlite3-mister
           path: sqlite3-mister.tar.gz
+
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Set release version based on current date (YYYY.MM.DD)
+          VERSION="v$(date +%Y.%m.%d)"
+          # Create a Git tag
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a "$VERSION" -m "Release $VERSION compiled on $(date -u)"
+          git push origin "$VERSION"
+          # Create GitHub release with the artifact
+          gh release create "$VERSION" \
+            --title "Release $VERSION" \
+            --notes "SQLite3 module for MiSTer FPGA compiled on April 10, 2025" \
+            sqlite3-mister.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
