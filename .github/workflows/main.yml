@@ -19,6 +19,95 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
+          # Add deadsnakes PPA for Python 3.9
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository ppa:deadsnakes/ppa -y
+          sudo apt-get update
+          # Install Python 3.9, its dev package, and other dependencies
+          sudo apt-get install -y build-essential git wget unzip \
+                                  python3.9 python3.9-dev \
+                                  crossbuild-essential-armhf \
+                                  zlib1g-dev libncurses5-dev
+
+      - name: Download SQLite3 Source
+        run: |
+          wget https://www.sqlite.org/2023/sqlite-autoconf-3430000.tar.gz
+          tar -xzf sqlite-autoconf-3430000.tar.gz
+          mv sqlite-autoconf-3430000 sqlite3-source
+
+      - name: Set Up ARM Cross-Compiler
+        run: |
+          export CC=arm-linux-gnueabihf-gcc
+          export CXX=arm-linux-gnueabihf-g++
+          export LD=arm-linux-gnueabihf-ld
+          export AR=arm-linux-gnueabihf-ar
+          export RANLIB=arm-linux-gnueabihf-ranlib
+          export CFLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16"
+          export LDFLAGS="-L/usr/arm-linux-gnueabihf/lib"
+
+      - name: Compile SQLite3 for ARM
+        working-directory: sqlite3-source
+        run: |
+          ./configure --host=arm-linux-gnueabihf --prefix=/usr/arm-linux-gnueabihf
+          make -j$(nproc)
+          make install DESTDIR=$PWD/install
+
+      - name: Build SQLite3 Python Module
+        run: |
+          # Set up Python 3.9 with cross-compiled SQLite
+          export PYTHONPATH=/usr/lib/python3.9
+          export CFLAGS="$CFLAGS -I$PWD/sqlite3-source/install/usr/arm-linux-gnueabihf/include"
+          export LDFLAGS="$LDFLAGS -L$PWD/sqlite3-source/install/usr/arm-linux-gnueabihf/lib"
+          # Compile Python's sqlite3 module against our SQLite
+          wget https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tar.xz
+          tar -xJf Python-3.9.0.tar.xz
+          cd Python-3.9.0
+          ./configure --host=arm-linux-gnueabihf --build=x86_64-linux-gnu \
+                      --prefix=/usr/arm-linux-gnueabihf \
+                      --enable-shared \
+                      --with-ensurepip=no \
+                      ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no
+          make -j$(nproc) LDFLAGS="$LDFLAGS -lsqlite3" Modules/_sqlite3.o
+          # Link the module manually
+          $CC -shared -o _sqlite3.so Modules/_sqlite3.o $LDFLAGS -lsqlite3 -lpthread
+
+      - name: Package Artifacts
+        run: |
+          mkdir -p artifacts
+          cp Python-3.9.0/_sqlite3.so artifacts/
+          cp sqlite3-source/install/usr/arm-linux-gnueabihf/lib/libsqlite3.so.0 artifacts/
+          tar -czf sqlite3-mister.tar.gz -C artifacts .
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqlite3-mister
+          path: sqlite3-mister.tar.gzname: Build SQLite3 for MiSTer FPGA
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          # Add deadsnakes PPA for Python 3.9
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository ppa:deadsnakes/ppa -y
+          sudo apt-get update
+          # Install Python 3.9, its dev package, and other dependencies
           sudo apt-get install -y build-essential git wget unzip \
                                   python3.9 python3.9-dev \
                                   crossbuild-essential-armhf \
