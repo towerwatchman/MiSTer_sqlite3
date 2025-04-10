@@ -78,7 +78,7 @@ jobs:
           arm-linux-gnueabihf-gcc -c prepare_protocol.c -o prepare_protocol.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
           arm-linux-gnueabihf-gcc -c row.c -o row.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
           arm-linux-gnueabihf-gcc -c statement.c -o statement.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc -c util.c -o util.c $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c util.c -o util.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
           arm-linux-gnueabihf-gcc -c cache.c -o cache.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
           # Link into shared object
           arm-linux-gnueabihf-gcc -shared -o _sqlite3.so *.o $LDFLAGS -lsqlite3 -lpthread
