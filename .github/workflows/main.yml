@@ -59,25 +59,25 @@ jobs:
           wget https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tar.xz
           tar -xJf Python-3.9.0.tar.xz
           cd Python-3.9.0
-          # Configure Python to generate headers (but don't build fully)
+          # Configure Python to generate headers
           ./configure --host=arm-linux-gnueabihf --build=x86_64-linux-gnu \
                       --prefix=/usr/arm-linux-gnueabihf \
                       --enable-shared \
                       --disable-ipv6 \
                       --with-ensurepip=no \
                       ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no
-          # Move to _sqlite module directory and compile
+          # Move to _sqlite module directory and compile with MODULE_NAME defined
           cd Modules/_sqlite
-          arm-linux-gnueabihf-gcc -c connection.c -o connection.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c cursor.c -o cursor.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c microprotocols.c -o microprotocols.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c module.c -o module.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c prepare_protocol.c -o prepare_protocol.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c row.c -o row.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c statement.c -o statement.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c util.c -o util.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c cache.c -o cache.o $CFLAGS -I../../Include -I../..
-          arm-linux-gnueabihf-gcc -c _sqlite3.c -o _sqlite3.o $CFLAGS -I../../Include -I../..
+          arm-linux-gnueabihf-gcc -c connection.c -o connection.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c cursor.c -o cursor.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c microprotocols.c -o microprotocols.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c module.c -o module.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c prepare_protocol.c -o prepare_protocol.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c row.c -o row.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c statement.c -o statement.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c util.c -o util.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c cache.c -o cache.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c _sqlite3.c -o _sqlite3.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
           # Link into shared object
           arm-linux-gnueabihf-gcc -shared -o _sqlite3.so *.o $LDFLAGS -lsqlite3 -lpthread
 
