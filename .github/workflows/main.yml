@@ -76,7 +76,7 @@ jobs:
           arm-linux-gnueabihf-gcc -c statement.c -o statement.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
           arm-linux-gnueabihf-gcc -c util.c -o util.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
           arm-linux-gnueabihf-gcc -c cache.c -o cache.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc -shared -o _sqlite3.so *.o $LDFLAGS $PWD/../sqlite3-source/install/usr/arm-linux-gnueabihf/lib/libsqlite3.a -lpthread
+          arm-linux-gnueabihf-gcc -shared -o _sqlite3.so *.o $LDFLAGS ../../../sqlite3-source/install/usr/arm-linux-gnueabihf/lib/libsqlite3.a -lpthread
 
       - name: Package Artifacts
         run: |
