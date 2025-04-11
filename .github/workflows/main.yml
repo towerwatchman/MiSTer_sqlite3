@@ -34,14 +34,9 @@ jobs:
           sudo mv gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf /opt/gcc-10.2-arm
           rm gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz
 
-      - name: Download SQLite3 Source
+      - name: Build SQLite3 and Python Module
         run: |
-          wget https://www.sqlite.org/2023/sqlite-autoconf-3430000.tar.gz
-          tar -xzf sqlite-autoconf-3430000.tar.gz
-          mv sqlite-autoconf-3430000 sqlite3-source
-
-      - name: Set Up ARM Cross-Compiler
-        run: |
+          # Set up ARM cross-compiler
           export PATH=/opt/gcc-10.2-arm/bin:$PATH
           export CC=/opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc
           export CXX=/opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-g++
@@ -50,21 +45,18 @@ jobs:
           export RANLIB=/opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-ranlib
           export CFLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -fPIC"
           export LDFLAGS="-L/usr/arm-none-linux-gnueabihf/lib -Wl,--no-as-needed"
-          # Verify toolchain and readelf
+          # Verify toolchain
           $CC --version
           /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-readelf --version
 
-      - name: Compile SQLite3 for ARM
-        working-directory: sqlite3-source
-        run: |
+          # Compile SQLite3
+          cd sqlite3-source || { wget https://www.sqlite.org/2023/sqlite-autoconf-3430000.tar.gz && tar -xzf sqlite-autoconf-3430000.tar.gz && mv sqlite-autoconf-3430000 sqlite3-source && cd sqlite3-source; }
           ./configure --host=arm-none-linux-gnueabihf --prefix=/usr/arm-none-linux-gnueabihf
           make -j$(nproc)
           make install DESTDIR=$PWD/install
+          cd ..
 
-      - name: Build SQLite3 Python Module
-        run: |
-          export CFLAGS="$CFLAGS -I$PWD/sqlite3-source/install/usr/arm-none-linux-gnueabihf/include"
-          export LDFLAGS="$LDFLAGS -L$PWD/sqlite3-source/install/usr/arm-none-linux-gnueabihf/lib"
+          # Build SQLite3 Python Module
           wget https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tar.xz
           tar -xJf Python-3.9.0.tar.xz
           cd Python-3.9.0
