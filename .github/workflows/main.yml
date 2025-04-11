@@ -67,16 +67,18 @@ jobs:
                       --with-ensurepip=no \
                       ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no
           cd Modules/_sqlite
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c connection.c -o connection.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c cursor.c -o cursor.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c microprotocols.c -o microprotocols.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c module.c -o module.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c prepare_protocol.c -o prepare_protocol.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c row.c -o row.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c statement.c -o statement.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c util.c -o util.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c cache.c -o cache.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -shared -o _sqlite3.so *.o $LDFLAGS $PWD/../sqlite3-source/install/usr/arm-none-linux-gnueabihf/lib/libsqlite3.a -lpthread
+          export SQLITE3_INCLUDE=../../../sqlite3-source/install/usr/arm-none-linux-gnueabihf/include
+          export SQLITE3_LIB=../../../sqlite3-source/install/usr/arm-none-linux-gnueabihf/lib
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c connection.c -o connection.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c cursor.c -o cursor.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c microprotocols.c -o microprotocols.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c module.c -o module.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c prepare_protocol.c -o prepare_protocol.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c row.c -o row.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c statement.c -o statement.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c util.c -o util.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -c cache.c -o cache.o $CFLAGS -I$SQLITE3_INCLUDE -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-gcc -shared -o _sqlite3.so *.o $LDFLAGS $SQLITE3_LIB/libsqlite3.a -lpthread
 
       - name: Package Artifacts
         run: |
