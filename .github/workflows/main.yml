@@ -24,12 +24,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y software-properties-common
           sudo add-apt-repository ppa:deadsnakes/ppa -y
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y  # For GCC 4.9
           sudo apt-get update
           sudo apt-get install -y build-essential git wget unzip \
                                   python3.9 python3.9-dev \
-                                  gcc-4.9-arm-linux-gnueabihf g++-4.9-arm-linux-gnueabihf \
                                   zlib1g-dev libncurses5-dev
+          # Install Linaro GCC 4.9
+          wget https://releases.linaro.org/archive/14.11/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2014.11-x86_64_arm-linux-gnueabihf.tar.xz
+          tar -xJf gcc-linaro-4.9-2014.11-x86_64_arm-linux-gnueabihf.tar.xz
+          sudo mv gcc-linaro-4.9-2014.11-x86_64_arm-linux-gnueabihf /opt/gcc-4.9-arm
+          rm gcc-linaro-4.9-2014.11-x86_64_arm-linux-gnueabihf.tar.xz
 
       - name: Download SQLite3 Source
         run: |
@@ -39,8 +42,9 @@ jobs:
 
       - name: Set Up ARM Cross-Compiler
         run: |
-          export CC=arm-linux-gnueabihf-gcc-4.9
-          export CXX=arm-linux-gnueabihf-g++-4.9
+          export PATH=/opt/gcc-4.9-arm/bin:$PATH
+          export CC=arm-linux-gnueabihf-gcc
+          export CXX=arm-linux-gnueabihf-g++
           export LD=arm-linux-gnueabihf-ld
           export AR=arm-linux-gnueabihf-ar
           export RANLIB=arm-linux-gnueabihf-ranlib
@@ -68,16 +72,16 @@ jobs:
                       --with-ensurepip=no \
                       ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no
           cd Modules/_sqlite
-          arm-linux-gnueabihf-gcc-4.9 -c connection.c -o connection.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -c cursor.c -o cursor.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -c microprotocols.c -o microprotocols.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -c module.c -o module.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -c prepare_protocol.c -o prepare_protocol.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -c row.c -o row.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -c statement.c -o statement.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -c util.c -o util.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -c cache.c -o cache.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
-          arm-linux-gnueabihf-gcc-4.9 -shared -o _sqlite3.so *.o $LDFLAGS $PWD/../sqlite3-source/install/usr/arm-linux-gnueabihf/lib/libsqlite3.a -lpthread
+          arm-linux-gnueabihf-gcc -c connection.c -o connection.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c cursor.c -o cursor.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c microprotocols.c -o microprotocols.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c module.c -o module.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c prepare_protocol.c -o prepare_protocol.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c row.c -o row.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c statement.c -o statement.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c util.c -o util.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -c cache.c -o cache.o $CFLAGS -I../../Include -I../.. -DMODULE_NAME=\"sqlite3\"
+          arm-linux-gnueabihf-gcc -shared -o _sqlite3.so *.o $LDFLAGS $PWD/../sqlite3-source/install/usr/arm-linux-gnueabihf/lib/libsqlite3.a -lpthread
 
       - name: Package Artifacts
         run: |
