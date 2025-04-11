@@ -27,6 +27,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential git wget unzip \
                                   python3.9 python3.9-dev \
+                                  binutils-arm-linux-gnueabihf \
                                   zlib1g-dev libncurses5-dev
           # Install Linaro GCC 4.9
           wget https://releases.linaro.org/archive/14.11/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2014.11-x86_64_arm-linux-gnueabihf.tar.xz
