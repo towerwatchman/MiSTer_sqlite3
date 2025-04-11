@@ -27,7 +27,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential git wget unzip \
                                   python3.9 python3.9-dev \
-                                  binutils-arm-linux-gnueabihf \
                                   zlib1g-dev libncurses5-dev
           # Install Linaro GCC 10.2
           wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz
@@ -51,8 +50,9 @@ jobs:
           export RANLIB=/opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-ranlib
           export CFLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -fPIC"
           export LDFLAGS="-L/usr/arm-none-linux-gnueabihf/lib -Wl,--no-as-needed"
-          # Verify toolchain
+          # Verify toolchain and readelf
           $CC --version
+          /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-readelf --version
 
       - name: Compile SQLite3 for ARM
         working-directory: sqlite3-source
