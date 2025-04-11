@@ -49,8 +49,8 @@ jobs:
           $CC --version
           /opt/gcc-10.2-arm/bin/arm-none-linux-gnueabihf-readelf --version
 
-          # Compile SQLite3
-          cd sqlite3-source || { wget https://www.sqlite.org/2023/sqlite-autoconf-3430000.tar.gz && tar -xzf sqlite-autoconf-3430000.tar.gz && mv sqlite-autoconf-3430000 sqlite3-source && cd sqlite3-source; }
+          # Compile SQLite3 3.49.1
+          cd sqlite3-source || { wget https://sqlite.org/2025/sqlite-autoconf-3490100.tar.gz && tar -xzf sqlite-autoconf-3490100.tar.gz && mv sqlite-autoconf-3490100 sqlite3-source && cd sqlite3-source; }
           ./configure --host=arm-none-linux-gnueabihf --prefix=/usr/arm-none-linux-gnueabihf
           make -j$(nproc)
           make install DESTDIR=$PWD/install
@@ -102,7 +102,7 @@ jobs:
           git push origin "$VERSION"
           gh release create "$VERSION" \
             --title "Release $VERSION" \
-            --notes "SQLite3 module for MiSTer FPGA compiled on $(date -u)" \
+            --notes "SQLite3 module (version 3.49.1) for MiSTer FPGA compiled on $(date -u)" \
             sqlite3-mister.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
