@@ -1,0 +1,72 @@
+name: Build MiSTer SQLite3 Database
+
+on:
+  push:
+    branches:
+      - db
+
+permissions:
+  contents: write  # Grants write access to repository contents
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests
+
+      - name: Generate Database JSON
+        run: |
+          # Create mister_sqlite3_db.json
+          cat > mister_sqlite3_db.json << EOL
+          {
+            "db_id": "mister_sqlite3",
+            "timestamp": $(date +%s),
+            "files": {
+              "Scripts/install_sqlite3_mister.sh": {
+                "hash": "$(md5sum Scripts/install_sqlite3_mister.sh | cut -d' ' -f1)",
+                "size": $(wc -c < Scripts/install_sqlite3_mister.sh),
+                "url": "https://raw.githubusercontent.com/towerwatchman/MiSTer_Sqlite3/db/Scripts/install_sqlite3_mister.sh",
+                "tags": ["sqlite3", "utility"],
+                "overwrite": true,
+                "reboot": false
+              }
+            },
+            "folders": {
+              "Scripts/": {
+                "tags": ["sqlite3"]
+              }
+            },
+            "default_options": {
+              "filter": "sqlite3"
+            }
+          }
+          EOL
+
+          # Zip the JSON file
+          zip mister_sqlite3_db.json.zip mister_sqlite3_db.json
+
+      - name: Create db-output Directory and Move ZIP
+        run: |
+          mkdir -p db-output
+          mv mister_sqlite3_db.json.zip db-output/
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add db-output/mister_sqlite3_db.json.zip
+          git commit -m "Update mister_sqlite3_db.json.zip for $GITHUB_SHA" || echo "No changes to commit"
+          git push origin db
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
